@@ -226,7 +226,7 @@ void MPU9250Sensor::startCalibration(int calibrationType) {
         ledManager.on();
         int16_t mx,my,mz;
         imu.getMagnetometer(&mx, &my, &mz);
-        magneto->sample(my, mx, -mz);
+        magneto->sample(mx, my, mz);
 
         ledManager.off();
         delay(250);
@@ -355,9 +355,9 @@ void MPU9250Sensor::startCalibration(int calibrationType) {
 
 void MPU9250Sensor::parseMagData(int16_t data[3]) {
     // reading *little* endian int16
-    Mxyz[0] = (float)data[1]; // my
-    Mxyz[1] = (float)data[0]; // mx
-    Mxyz[2] = -(float)data[2]; // mz
+    Mxyz[0] = (float)data[0]; // mx
+    Mxyz[1] = (float)data[1]; // my
+    Mxyz[2] = (float)data[2]; // mz
 
     float temp[3];
 
