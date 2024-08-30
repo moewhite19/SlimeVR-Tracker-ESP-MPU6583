@@ -18,7 +18,7 @@ namespace SlimeVR
         #if !SENSOR_FUSION_WITH_RESTDETECT
         struct SensorRestDetectionParams: RestDetectionParams {
             SensorRestDetectionParams() : RestDetectionParams() {
-                restMinTimeMicros = 2.0f * 1e6;
+                restMinTime = 2.0f;
                 restThGyr = 0.6f; // 400 norm
                 restThAcc = 0.06f; // 100 norm
             }
@@ -39,8 +39,8 @@ namespace SlimeVR
             bool getRestDetected();
 
             #if !SENSOR_FUSION_WITH_RESTDETECT
-                void updateAcc(sensor_real_t Axyz[3], sensor_real_t deltat);
-                void updateGyro(sensor_real_t Gxyz[3], sensor_real_t deltat);
+                void updateAcc(const sensor_real_t Axyz[3], const sensor_real_t deltat);
+                void updateGyro(const sensor_real_t Gxyz[3], const sensor_real_t deltat);
             #endif
         protected:
             #if !SENSOR_FUSION_WITH_RESTDETECT

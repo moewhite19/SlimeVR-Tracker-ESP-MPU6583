@@ -130,7 +130,6 @@ void MPU9250Sensor::motionSetup() {
     imu.setFIFOEnabled(true);
 
     working = true;
-    configured = true;
 #endif
 }
 
@@ -154,6 +153,7 @@ void MPU9250Sensor::motionLoop() {
     uint8_t dmpPacket[packetSize];
     if(!imu.GetCurrentFIFOPacket(dmpPacket, packetSize)) return;
     if(imu.dmpGetQuaternion(&rawQuat, dmpPacket)) return; // FIFO CORRUPTED
+    hadData = true;
 
     sfusion.updateQuaternion(rawQuat);
 
@@ -162,9 +162,6 @@ void MPU9250Sensor::motionLoop() {
     parseMagData(temp);
 
     sfusion.updateMag(Mxyz);
-
-    fusedRotation = sfusion.getQuaternionQuat();
-
     #if SEND_ACCELERATION
     {
         int16_t atemp[3];
@@ -172,12 +169,8 @@ void MPU9250Sensor::motionLoop() {
         parseAccelData(atemp);
 
         sfusion.updateAcc(Axyz);
-
-        acceleration = sfusion.getLinearAccVec();
-		setAccelerationReady();
     }
     #endif
-
 #else
     union fifo_sample_raw buf;
     uint16_t remaining_samples;
@@ -196,16 +189,11 @@ void MPU9250Sensor::motionLoop() {
 
         sfusion.update9D(Axyz, Gxyz, Mxyz);
     }
-
-    fusedRotation = sfusion.getQuaternionQuat();
-
-    #if SEND_ACCELERATION
-    acceleration = sfusion.getLinearAccVec();
-	setAccelerationReady();
-    #endif
 #endif
-    fusedRotation *= sensorOffset;
-    setFusedRotationReady();
+    setFusedRotation(sfusion.getQuaternionQuat());
+    #if SEND_ACCELERATION
+	setAcceleration(sfusion.getLinearAccVec());
+    #endif
 }
 
 void MPU9250Sensor::startCalibration(int calibrationType) {

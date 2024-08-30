@@ -106,7 +106,6 @@ void MPU6050Sensor::motionSetup()
         packetSize = imu.dmpGetFIFOPacketSize();
 
         working = true;
-        configured = true;
     }
     else
     {
@@ -136,12 +135,11 @@ void MPU6050Sensor::motionLoop()
     if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
     {
         imu.dmpGetQuaternion(&rawQuat, fifoBuffer);
+        hadData = true;
 
         sfusion.updateQuaternion(rawQuat);
 
-        fusedRotation = sfusion.getQuaternionQuat();
-        fusedRotation *= sensorOffset;
-        setFusedRotationReady();
+        setFusedRotation(sfusion.getQuaternionQuat());
 
         #if SEND_ACCELERATION
         {
@@ -153,8 +151,7 @@ void MPU6050Sensor::motionLoop()
 
             sfusion.updateAcc(Axyz);
 
-            acceleration = sfusion.getLinearAccVec();
-			setAccelerationReady();
+			setAcceleration(sfusion.getLinearAccVec());
         }
         #endif
     }
